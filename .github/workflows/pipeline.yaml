@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: ['']
+    branches: ['*']
   pull_request:
-    branches: ['']
+    branches: ['*']
   workflow_dispatch:
 
 jobs:
@@ -14,25 +14,29 @@ jobs:
       CI: false
 
     steps:
-      
-uses: actions/checkout@v3
-uses: actions/setup-node@v3
-    with:
-      node-version: '20'
-run: node -v
-run: npm -v
-run: npm install
-run: npm install -g zoho-extension-toolkit
-run: zet
-run: mkdir app-pack && mkdir app-pack/app
-run: |
-  echo '{"service": "CREATOR","cspDomains": {"connect-src": []}}' > app-pack/plugin-manifest.json
-run: npm run build
-run: sed -i 's|/assets/|assets/|g' dist/index.html
-run: cp -r dist/* app-pack/app/.
-run: cd app-pack && zet validate
-run: cd app-pack && zet pack
-uses: actions/upload-artifact@v4
-with:
-  name: ${{ github.event.repository.name }}
-  path: app-pack/dist/app-pack.zip
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - run: node -v
+      - run: npm -v
+      - run: npm install
+      - run: npm install -g zoho-extension-toolkit
+      - run: zet
+      - run: mkdir app-pack && mkdir app-pack/app
+      - run: |
+          echo '{
+            "service": "CREATOR",
+            "cspDomains": {
+              "connect-src": []
+            }
+          }' > app-pack/plugin-manifest.json
+      - run: npm run build
+      - run: sed -i 's|/assets/|assets/|g' dist/index.html
+      - run: cp -r dist/* app-pack/app/.
+      - run: cd app-pack && zet validate
+      - run: cd app-pack && zet pack
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}
+          path: app-pack/dist/app-pack.zip
